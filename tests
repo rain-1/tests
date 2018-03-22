@@ -21,7 +21,7 @@ function test_run {
 	
 	echo "$mytest: running \"$mycmd\" ..."
 	
-	( $mycmd >"$stdout_tmp" 2>"$stderr_tmp" )
+	( sh -c "$mycmd" >"$stdout_tmp" 2>"$stderr_tmp" )
 }
 
 function check_expect {
