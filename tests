@@ -68,12 +68,12 @@ find "$folder" \
 	-print0 | \
 	sort -z >"$tests"
 
-while IFS='' read -r -d $'\0' test <&3 ; do
-	if [ -e "$test.expect" ] ; then
-		test_run "$test"
+while IFS='' read -r -d $'\0' filename <&3 ; do
+	if [ -e "$filename.expect" ] ; then
+		test_run "$filename"
 		check_expect
-	elif [ -e "$test.error" ] ; then
-		test_run "$test"
+	elif [ -e "$filename.error" ] ; then
+		test_run "$filename"
 		check_error
 	fi
 done 3< "$tests"
