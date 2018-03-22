@@ -1,0 +1,79 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+	echo './tests <dir> <cmdline>'
+	exit 1
+fi
+
+folder="$1"
+cmdline="$2"
+
+tmpdir=$(mktemp -d)
+tests="$tmpdir"/tests
+stdout_tmp="$tmpdir"/stdout
+stderr_tmp="$tmpdir"/stderr
+
+function test_run {
+	mytest="$1"
+	# replace {} in the command line with our input test filename
+	mycmd="${cmdline//\{\}/$mytest}"
+	
+	echo "$mytest: running \"$mycmd\" ..."
+	
+	( $mycmd >"$stdout_tmp" 2>"$stderr_tmp" )
+}
+
+function check_expect {
+	if [ $? -ne 0 ]
+	then
+		echo "test failed due to error code $?."
+		cat "$stderr_tmp" >2
+		exit 1
+	fi
+	
+	diff "$stdout_tmp" "$mytest.expect"
+	if [ $? -ne 0 ]
+	then
+		echo "test failed"
+		exit 1
+	fi
+	
+	echo ok
+}
+
+function check_error {
+	if [ $? -eq 0 ]
+	then
+		echo "test failed due to program succeeding."
+		cat "$stderr_tmp" >2
+		exit 1
+	fi
+	
+	grep -q "$(cat $mytest.error)" "$stderr_tmp"
+	if [ $? -ne 0 ]
+	then
+		echo "test failed"
+		echo could not find "$(cat $mytest.error)" inside
+		cat "$stderr_tmp"
+		exit 1
+	fi
+	
+	echo ok
+}
+
+find "$folder" \
+	-type f \
+	-not -regex '.*.expect' -and -not -name '*~' \
+	-print0 | \
+	sort -z >"$tests"
+
+while IFS='' read -r -d $'\0' test <&3 ; do
+	if [ -e "$test.expect" ] ; then
+		test_run "$test"
+		check_expect
+	elif [ -e "$test.error" ] ; then
+		test_run "$test"
+		check_error
+	fi
+done 3< "$tests"
