@@ -6,7 +6,7 @@ You invoke it like this `tests <directory> <commandline>` using `{}` being a spe
 
 For example try `tests example/ "bash {}"`
 
-# use with travis-ci
+## use with travis-ci
 
 You can use this with travis-ci easily.
 
@@ -20,5 +20,5 @@ then add a target to your makefile like
 
 ```
 test:
-  ./tests/tests t/trivial 'cat init.scm {} | ./bin/sch3'
+	./tests/tests t/trivial 'cat init.scm {} | ./bin/sch3'
 ```
