@@ -6,3 +6,19 @@ You invoke it like this `tests <directory> <commandline>` using `{}` being a spe
 
 For example try `tests example/ "bash {}"`
 
+# use with travis-ci
+
+You can use this with travis-ci easily.
+
+Just get your git repo and add tests as a submodule:
+
+```
+git submodule add -b master https://github.com/rain-1/tests.git
+```
+
+then add a target to your makefile like
+
+```
+test:
+  ./tests/tests t/trivial 'cat init.scm {} | ./bin/sch3'
+```
